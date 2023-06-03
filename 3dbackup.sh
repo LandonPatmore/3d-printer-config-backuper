@@ -17,7 +17,7 @@ PRIVATE_REPO=""
 PRINTER_CONFIG_PATH=""
 RASPBERRY_PI_USERNAME=""
 RASPBERRY_PI_IP=""
-RASPBERRY_PI_SCRIPT_NAME="rpi_3d_printer_config_backuper.sh"
+RASPBERRY_PI_SCRIPT_NAME="3dbackup_rpi.sh"
 CRON_CONFIG=""
 
 function prompt_yes_no() {
@@ -81,14 +81,7 @@ Name: " GITHUB_NAME
 prompt_yes_no "$GITHUB_NAME"
 
 read -rp "
-Enter the name of your repository
-
-Repo name: " REPO_NAME
-
-prompt_yes_no "$REPO_NAME"
-
-read -rp "
-Wwe will setup the repository your config files will live in.
+We will setup the repository your config files will live in.
 
 There are two options:
 
@@ -130,8 +123,15 @@ time interval to back up your printer config.
 
 Link: https://crontab-generator.org/
 
-Please make sure to copy it EXACTLY how it is, or your autocommits will not work properly.
+Enter any text within the 'Command to execute box' (this does not matter)
 
+ONLY COPY the first set of text
+
+Example: * 7 * * * my_test_command >/dev/null 2>&1
+
+Copy only: * 7 * * *
+
+Or your autocommits will not work properly.
 
 Cron tab config: " CRON_CONFIG
 
@@ -144,7 +144,6 @@ Personal token: $PERSONAL_TOKEN
 Github name: $GITHUB_USERNAME
 Github email: $GITHUB_EMAIL
 Github name: $GITHUB_NAME
-Repo name: $REPO_NAME
 Is private repo?: $PRIVATE_REPO
 Printer config path: $PRINTER_CONFIG_PATH
 Raspberry pi ip address: $RASPBERRY_PI_IP
@@ -152,20 +151,19 @@ Raspberry pi username: $RASPBERRY_PI_USERNAME
 Crontab config: $CRON_CONFIG
 "
 
-SCRIPT_PATH="/home/$RASPBERRY_PI_USERNAME/$RASPBERRY_PI_SCRIPT_NAME"
+SCRIPT_BASE="/home/$RASPBERRY_PI_USERNAME"
 
 # SCP script file over
 
 printf "Sending script to raspberry pi..."
-scp "$RASPBERRY_PI_SCRIPT_NAME" landon@192.168.1.149:"$SCRIPT_PATH"
-print "Sent"
+scp "$RASPBERRY_PI_SCRIPT_NAME" autocommit.sh "$RASPBERRY_PI_USERNAME"@"$RASPBERRY_PI_IP":"$SCRIPT_BASE"
+printf "Sent"
 
 # SSH in
 
 printf "Executing script on raspberry pi..."
 ssh -t "$RASPBERRY_PI_USERNAME"@"$RASPBERRY_PI_IP" "
-  sudo chmod +x \"$SCRIPT_PATH\";
-  sudo $SCRIPT_PATH \"$PERSONAL_TOKEN\" \"$GITHUB_USERNAME\" \"$GITHUB_EMAIL\" \"$GITHUB_NAME\" \"$PRIVATE_REPO\" \"$PRINTER_CONFIG_PATH\" \"$RASPBERRY_PI_USERNAME\" \"$CRON_CONFIG\"; \
-  sudo rm \"$SCRIPT_PATH\"
+  sudo chmod +x \"$SCRIPT_BASE\"/\"$RASPBERRY_PI_SCRIPT_NAME\" \"$SCRIPT_BASE\"/autocommit.sh;
+  sudo -u \"$RASPBERRY_PI_USERNAME\" \"$SCRIPT_BASE\"/\"$RASPBERRY_PI_SCRIPT_NAME\" \"$PERSONAL_TOKEN\" \"$GITHUB_USERNAME\" \"$GITHUB_EMAIL\" \"$GITHUB_NAME\" \"$PRIVATE_REPO\" \"$PRINTER_CONFIG_PATH\" \"$RASPBERRY_PI_USERNAME\" \"$CRON_CONFIG\"; \
+  sudo rm \"$SCRIPT_BASE\"/\"$RASPBERRY_PI_SCRIPT_NAME\"
 "
-printf "Done!"
