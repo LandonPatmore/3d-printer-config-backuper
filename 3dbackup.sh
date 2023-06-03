@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-###################################################################
-# Script Name	  : 3d_printer_config_backuper.sh
-# Description	  : Gets all of the necessary information to setup your raspberry pi to auto backup
-                # your printer config files.
-# Author       	: Landon Patmore
-# Email         : landon.patmore@gmail.com
-# License       : MIT
-###################################################################
+#==============================================================================
+# title           : 3dbackup.sh
+# description     : Gets all of the necessary information to setup your raspberry pi to auto backup your printer config files.
+# author		      : LandonPatmore
+# version         : 0.1
+# usage		        : ./3dbackup.sh
+# license         : MIT
+#==============================================================================
 
 PERSONAL_TOKEN=""
 GITHUB_USERNAME=""
@@ -18,6 +18,7 @@ PRINTER_CONFIG_PATH=""
 RASPBERRY_PI_USERNAME=""
 RASPBERRY_PI_IP=""
 RASPBERRY_PI_SCRIPT_NAME="rpi_3d_printer_config_backuper.sh"
+CRON_CONFIG=""
 
 function prompt_yes_no() {
   INPUT=$1
@@ -123,6 +124,19 @@ IP: " RASPBERRY_PI_IP
 
 prompt_yes_no "$RASPBERRY_PI_IP"
 
+read -rp "
+Click the following link to generate a crontab configuration. This will schedule an auto commit to happen at a certain
+time interval to back up your printer config.
+
+Link: https://crontab-generator.org/
+
+Please make sure to copy it EXACTLY how it is, or your autocommits will not work properly.
+
+
+Cron tab config: " CRON_CONFIG
+
+prompt_yes_no "$CRON_CONFIG"
+
 prompt_yes_no "" "
 Please take a look at your settings one more time, things will be automated from here:
 
@@ -135,6 +149,7 @@ Is private repo?: $PRIVATE_REPO
 Printer config path: $PRINTER_CONFIG_PATH
 Raspberry pi ip address: $RASPBERRY_PI_IP
 Raspberry pi username: $RASPBERRY_PI_USERNAME
+Crontab config: $CRON_CONFIG
 "
 
 SCRIPT_PATH="/home/$RASPBERRY_PI_USERNAME/$RASPBERRY_PI_SCRIPT_NAME"
@@ -150,7 +165,7 @@ print "Sent"
 printf "Executing script on raspberry pi..."
 ssh -t "$RASPBERRY_PI_USERNAME"@"$RASPBERRY_PI_IP" "
   sudo chmod +x \"$SCRIPT_PATH\";
-  sudo $SCRIPT_PATH \"$PERSONAL_TOKEN\" \"$GITHUB_USERNAME\" \"$GITHUB_EMAIL\" \"$GITHUB_NAME\" \"$PRIVATE_REPO\" \"$PRINTER_CONFIG_PATH\" \"$RASPBERRY_PI_USERNAME\"; \
+  sudo $SCRIPT_PATH \"$PERSONAL_TOKEN\" \"$GITHUB_USERNAME\" \"$GITHUB_EMAIL\" \"$GITHUB_NAME\" \"$PRIVATE_REPO\" \"$PRINTER_CONFIG_PATH\" \"$RASPBERRY_PI_USERNAME\" \"$CRON_CONFIG\"; \
   sudo rm \"$SCRIPT_PATH\"
 "
 printf "Done!"
