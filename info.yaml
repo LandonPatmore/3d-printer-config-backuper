@@ -1,0 +1,10 @@
+title: 3dbakup
+author: Landon Patmore (https://github.com/LandonPatmore)
+repo: https://github.com/LandonPatmore/3dbakup
+version: 0.2
+license: MIT
+description: |
+  This utility will walk you through getting setup with Github to make sure you have a backup of your files in the unfortunate event your machine breaks, spill coffee on it, or a literal blackhole swallows your printer.
+  It will also setup your machine to autocommit your printer config on a timed interval (of your choosing).
+notice: You assume the risk of running this script. It has been tested heavily, but always be cautious. Create a separate backup of your files if you feel necessary, even though the script does this automatically.
+
